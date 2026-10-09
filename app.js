@@ -455,6 +455,7 @@
     const ring = $('timer-run');
     const ringBar = $('ring-bar');
     const timerDigits = $('timer-digits');
+    const timerMs = $('timer-ms');
     const timerLabel = $('timer-label');
     const btnStart = $('btn-start');
     const btnPause = $('btn-pause');
@@ -546,14 +547,18 @@
         updateTargetHint(Date.now());
     });
 
-    // Countdown text, rounded *up* to the whole second like a real timer:
-    // it reads 05:00 the moment it starts and 00:00 exactly when it rings.
+    // Exact remaining time split into "MM:SS" (or "H:MM:SS") and ".mmm".
+    // A 5-minute timer reads 05:00.000 when it starts and 00:00.000 when it rings.
     function formatCountdown(ms) {
-        const totalSec = Math.max(0, Math.ceil(ms / 1000));
+        ms = Math.max(0, Math.floor(ms));
+        const totalSec = Math.floor(ms / 1000);
         const h = Math.floor(totalSec / 3600);
         const m = Math.floor((totalSec % 3600) / 60);
         const sec = totalSec % 60;
-        return h > 0 ? `${h}:${pad(m)}:${pad(sec)}` : `${pad(m)}:${pad(sec)}`;
+        return {
+            main: h > 0 ? `${h}:${pad(m)}:${pad(sec)}` : `${pad(m)}:${pad(sec)}`,
+            ms: '.' + pad(ms % 1000, 3),
+        };
     }
 
     function updateTargetHint(now) {
@@ -565,7 +570,8 @@
             targetHint.textContent = 'That time has already passed';
             targetHint.classList.add('bad');
         } else {
-            targetHint.textContent = `Countdown: ${formatCountdown(target - now)}`;
+            const c = formatCountdown(target - now);
+            targetHint.textContent = `Countdown: ${c.main}${c.ms}`;
             targetHint.classList.remove('bad');
         }
     }
@@ -710,8 +716,9 @@
         const rem = timer.state === 'running' ? Math.min(timer.total, Math.max(0, timer.endAt - now))
             : timer.state === 'paused' ? timer.remaining : 0;
 
-        const str = formatCountdown(rem);
+        const { main: str, ms } = formatCountdown(rem);
         renderDigits(timerDigits, str);
+        renderDigits(timerMs, ms);
         timerDigits.dataset.len = str.length;
 
         const progress = timer.total > 0 ? Math.min(1, rem / timer.total) : 0;
@@ -735,7 +742,6 @@
     // ---------------------------------------------------------------
     // Main loop
     // ---------------------------------------------------------------
-    let lastHintSec = -1;
 
     function tick() {
         const now = Date.now();
@@ -745,8 +751,7 @@
             if (now >= timer.endAt) finishTimer();
             else renderTimerDisplay(now);
         } else if (timer.state === 'idle' && settings.mode === 'target' && !viewTimer.hidden) {
-            const s = Math.floor(now / 1000);
-            if (s !== lastHintSec) { lastHintSec = s; updateTargetHint(now); }
+            updateTargetHint(now);
         }
     }
 

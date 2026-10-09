@@ -584,6 +584,15 @@ select option { background: var(--bg); color: var(--text); }
 .timer-digits[data-len="7"] { font-size: 15.5cqi; }
 .timer-digits[data-len="8"] { font-size: 14cqi; }
 .timer-digits[data-len="9"] { font-size: 12.5cqi; }
+.timer-ms-pill {
+    padding: .18em .55em;
+    border-radius: .5em;
+    font-size: 7cqi;
+}
+.timer-ms-pill .digits { color: var(--accent); font-weight: 700; }
+.ring.is-warn .timer-ms-pill .digits { color: var(--warn); }
+.ring.is-done .timer-ms-pill .digits { color: var(--danger); }
+
 .timer-label {
     min-height: 1.3em;
     font-size: 4.2cqi;
