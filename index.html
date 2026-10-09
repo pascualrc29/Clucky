@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Clucky</title>
+    <meta name="description" content="Clucky — a clean, neumorphic world clock and countdown timer you can install on your phone.">
+
+    <!-- PWA / installability -->
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta id="meta-theme" name="theme-color" content="#e4e9f1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Clucky">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+    <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Apply saved theme before first paint to avoid a flash -->
+    <script>
+        try {
+            var t = (JSON.parse(localStorage.getItem('clucky:settings')) || {}).theme;
+            if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+        } catch (e) {}
+    </script>
+</head>
+<body>
+    <!-- Icon sprite -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></symbol>
+        <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
+        <symbol id="i-expand" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></symbol>
+        <symbol id="i-shrink" viewBox="0 0 24 24"><path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3"/></symbol>
+        <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol>
+        <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></symbol>
+        <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+        <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></symbol>
+        <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></symbol>
+        <symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></symbol>
+        <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+        <symbol id="i-share" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></symbol>
+    </svg>
+
+    <div class="app">
+        <div class="chrome">
+            <header class="topbar">
+                <div class="brand">
+                    <img class="brand-mark" src="icons/icon.svg" width="46" height="46" alt="">
+                    <div>
+                        <h1 class="brand-name">Clucky</h1>
+                        <p class="brand-tag">Clock &amp; Timer</p>
+                    </div>
+                </div>
+                <div class="actions">
+                    <button id="btn-install" class="icon-btn neu-out-sm" type="button" aria-label="Install Clucky" title="Install app" hidden>
+                        <svg class="icon"><use href="#i-download"/></svg>
+                    </button>
+                    <button id="btn-focus" class="icon-btn neu-out-sm" type="button" aria-label="Focus mode" title="Focus mode (F)">
+                        <svg class="icon"><use href="#i-expand"/></svg>
+                    </button>
+                    <button id="btn-theme" class="icon-btn neu-out-sm" type="button" aria-label="Toggle dark mode" title="Toggle theme">
+                        <svg class="icon"><use id="theme-icon" href="#i-moon"/></svg>
+                    </button>
+                </div>
+            </header>
+
+            <nav class="tabs neu-in" role="tablist" aria-label="Mode" data-active="clock">
+                <span class="tab-indicator neu-out-sm" aria-hidden="true"></span>
+                <button id="tab-clock" class="tab" role="tab" type="button" aria-selected="true" aria-controls="view-clock">Clock</button>
+                <button id="tab-timer" class="tab" role="tab" type="button" aria-selected="false" aria-controls="view-timer">Timer</button>
+            </nav>
+        </div>
+
+        <main>
+            <!-- ============ CLOCK ============ -->
+            <section id="view-clock" class="card neu-out" role="tabpanel" aria-labelledby="tab-clock">
+                <div class="card-head">
+                    <label class="select-pill neu-in-sm">
+                        <svg class="icon sm" aria-hidden="true"><use href="#i-globe"/></svg>
+                        <span class="sr-only">Time zone</span>
+                        <select id="clock-tz"></select>
+                        <svg class="icon sm chev" aria-hidden="true"><use href="#i-chevron"/></svg>
+                    </label>
+                    <button id="btn-format" class="chip neu-out-sm" type="button" title="Switch 12/24-hour format">12H</button>
+                </div>
+
+                <div class="card-body clock-body">
+                    <div class="clock-main" id="clock-main" role="timer" aria-live="off">
+                        <div class="tile neu-in"><span id="clock-h" class="digits">00</span></div>
+                        <div class="colon" id="clock-colon" aria-hidden="true"><i></i><i></i></div>
+                        <div class="tile neu-in"><span id="clock-m" class="digits">00</span></div>
+                    </div>
+
+                    <div class="clock-meta">
+                        <div class="clock-sub">
+                            <div class="sec-pill neu-in-sm">
+                                <span id="clock-s" class="digits">00</span><span id="clock-ms" class="digits ms">.000</span>
+                            </div>
+                            <div id="clock-ampm" class="ampm neu-out-sm">AM</div>
+                        </div>
+
+                        <div class="sec-track neu-in-sm" aria-hidden="true"><div id="sec-fill" class="sec-fill"></div></div>
+
+                        <div class="clock-date">
+                            <span id="clock-date">&nbsp;</span>
+                            <span id="clock-offset" class="tz-badge">GMT</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============ TIMER ============ -->
+            <section id="view-timer" class="card neu-out" role="tabpanel" aria-labelledby="tab-timer" hidden>
+                <div id="timer-mode" class="seg neu-in-sm" role="group" aria-label="Timer type">
+                    <button type="button" data-mode="duration" aria-pressed="true">Duration</button>
+                    <button type="button" data-mode="target" aria-pressed="false">Target time</button>
+                </div>
+
+                <div class="card-body timer-body">
+                    <!-- Duration setup -->
+                    <div id="timer-setup" class="setup">
+                        <div class="dur" id="dur">
+                            <div class="dur-field">
+                                <input id="input-h" class="neu-in" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" data-max="99" value="00" aria-label="Hours">
+                                <label for="input-h">Hours</label>
+                            </div>
+                            <div class="dur-sep" aria-hidden="true">:</div>
+                            <div class="dur-field">
+                                <input id="input-m" class="neu-in" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" data-max="59" value="05" aria-label="Minutes">
+                                <label for="input-m">Mins</label>
+                            </div>
+                            <div class="dur-sep" aria-hidden="true">:</div>
+                            <div class="dur-field">
+                                <input id="input-s" class="neu-in" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" data-max="59" value="00" aria-label="Seconds">
+                                <label for="input-s">Secs</label>
+                            </div>
+                        </div>
+                        <div class="presets" id="presets">
+                            <button type="button" class="preset neu-out-sm" data-sec="60">1m</button>
+                            <button type="button" class="preset neu-out-sm" data-sec="180">3m</button>
+                            <button type="button" class="preset neu-out-sm" data-sec="300">5m</button>
+                            <button type="button" class="preset neu-out-sm" data-sec="600">10m</button>
+                            <button type="button" class="preset neu-out-sm" data-sec="900">15m</button>
+                            <button type="button" class="preset neu-out-sm" data-sec="1500">25m</button>
+                            <button type="button" class="preset neu-out-sm" data-sec="1800">30m</button>
+                            <button type="button" class="preset neu-out-sm" data-sec="3600">1h</button>
+                        </div>
+                    </div>
+
+                    <!-- Target-time setup -->
+                    <div id="timer-target-setup" class="setup target" hidden>
+                        <label class="field">
+                            <span>Date &amp; time</span>
+                            <input id="input-target-time" class="neu-in-sm" type="datetime-local">
+                        </label>
+                        <label class="field">
+                            <span>Time zone</span>
+                            <span class="select-wrap">
+                                <select id="input-target-tz" class="neu-in-sm"></select>
+                                <svg class="icon sm chev" aria-hidden="true"><use href="#i-chevron"/></svg>
+                            </span>
+                        </label>
+                        <p id="target-hint" class="hint">&nbsp;</p>
+                    </div>
+
+                    <!-- Running display -->
+                    <div id="timer-run" class="ring neu-out" hidden>
+                        <svg viewBox="0 0 200 200" aria-hidden="true">
+                            <defs>
+                                <linearGradient id="ring-grad" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0" style="stop-color:var(--accent)"/>
+                                    <stop offset="1" style="stop-color:var(--accent-2)"/>
+                                </linearGradient>
+                            </defs>
+                            <circle class="ring-track" cx="100" cy="100" r="91"/>
+                            <circle id="ring-bar" class="ring-bar" cx="100" cy="100" r="91"/>
+                        </svg>
+                        <div class="ring-inner neu-in" id="ring-inner">
+                            <div id="timer-digits" class="digits timer-digits" role="timer">00:00</div>
+                            <div id="timer-ms" class="digits timer-ms">.000</div>
+                            <div id="timer-label" class="timer-label">&nbsp;</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="controls">
+                    <button id="btn-reset" class="round neu-out-sm" type="button" aria-label="Reset" title="Reset">
+                        <svg class="icon"><use href="#i-reset"/></svg>
+                    </button>
+                    <button id="btn-start" class="round big primary" type="button" aria-label="Start" title="Start (Space)">
+                        <svg class="icon fill"><use href="#i-play"/></svg>
+                    </button>
+                    <button id="btn-pause" class="round big alt neu-out" type="button" aria-label="Pause" title="Pause (Space)" hidden>
+                        <svg class="icon fill"><use href="#i-pause"/></svg>
+                    </button>
+                    <button id="btn-add" class="round neu-out-sm add" type="button" aria-label="Add one minute" title="Add 1 minute" hidden>+1m</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <button id="btn-exit-focus" class="exit-focus icon-btn neu-out-sm" type="button" aria-label="Exit focus mode" title="Exit focus (Esc)">
+        <svg class="icon"><use href="#i-shrink"/></svg>
+    </button>
+
+    <div id="ios-hint" class="toast neu-out" role="dialog" aria-live="polite" hidden>
+        <img src="icons/icon.svg" width="40" height="40" alt="">
+        <p>Install Clucky: tap <svg class="icon sm inline" aria-label="Share"><use href="#i-share"/></svg> <b>Share</b>, then <b>Add to Home Screen</b>.</p>
+        <button id="ios-hint-close" class="icon-btn sm" type="button" aria-label="Dismiss">
+            <svg class="icon sm"><use href="#i-x"/></svg>
+        </button>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

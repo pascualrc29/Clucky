@@ -1,0 +1,28 @@
+{
+    "id": "./",
+    "name": "Clucky — Clock & Timer",
+    "short_name": "Clucky",
+    "description": "A clean, neumorphic world clock and countdown timer.",
+    "start_url": "./",
+    "scope": "./",
+    "display": "standalone",
+    "orientation": "any",
+    "background_color": "#e4e9f1",
+    "theme_color": "#e4e9f1",
+    "categories": ["utilities", "productivity"],
+    "icons": [
+        { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+        { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+        { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+        { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+    ],
+    "screenshots": [
+        { "src": "screenshots/clock-mobile.png", "sizes": "780x1688", "type": "image/png", "form_factor": "narrow", "label": "Big, bold clock" },
+        { "src": "screenshots/timer-mobile.png", "sizes": "780x1688", "type": "image/png", "form_factor": "narrow", "label": "Countdown timer" },
+        { "src": "screenshots/clock-wide.png", "sizes": "1920x1080", "type": "image/png", "form_factor": "wide", "label": "Clucky on desktop" }
+    ],
+    "shortcuts": [
+        { "name": "Timer", "short_name": "Timer", "url": "./?tab=timer", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+        { "name": "Clock", "short_name": "Clock", "url": "./?tab=clock", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+    ]
+}
