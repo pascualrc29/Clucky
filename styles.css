@@ -14,8 +14,13 @@
     --accent-soft: rgba(88, 101, 242, .12);
     --danger: #ef4444;
     --final: #059669;
-    --final-2: #22c55e;
-    --final-glow: rgba(16, 185, 129, .45);
+    /* 3D digit shading: face gradient (top -> bottom), extruded edge, rim highlight, drop shadow */
+    --dig-1: #556080; --dig-2: #171c2a; --dig-edge: #0b0e16;
+    --acc-1: #8f98ff; --acc-2: #3f45cf; --acc-edge: #272b8f;
+    --fin-1: #34d399; --fin-2: #047857; --fin-edge: #053d2e;
+    --bad-1: #f87171; --bad-2: #b91c1c; --bad-edge: #6b1414;
+    --dig-hi: rgba(255, 255, 255, .95);
+    --dig-drop: rgba(24, 30, 52, .30);
     --radius-xl: 2.25rem;
     color-scheme: light;
 }
@@ -32,8 +37,12 @@
         --accent-2: #a78bfa;
         --accent-soft: rgba(131, 144, 255, .16);
         --final: #34d399;
-        --final-2: #4ade80;
-        --final-glow: rgba(52, 211, 153, .45);
+        --dig-1: #ffffff; --dig-2: #a9b3c9; --dig-edge: #5d667b;
+        --acc-1: #c3c9ff; --acc-2: #6670f0; --acc-edge: #343a9c;
+        --fin-1: #8ff0c6; --fin-2: #10a874; --fin-edge: #064a37;
+        --bad-1: #fecaca; --bad-2: #e43d3d; --bad-edge: #7a1717;
+        --dig-hi: rgba(255, 255, 255, .10);
+        --dig-drop: rgba(0, 0, 0, .55);
         color-scheme: dark;
     }
 }
@@ -49,8 +58,12 @@
     --accent-2: #a78bfa;
     --accent-soft: rgba(131, 144, 255, .16);
     --final: #34d399;
-    --final-2: #4ade80;
-    --final-glow: rgba(52, 211, 153, .45);
+    --dig-1: #ffffff; --dig-2: #a9b3c9; --dig-edge: #5d667b;
+    --acc-1: #c3c9ff; --acc-2: #6670f0; --acc-edge: #343a9c;
+    --fin-1: #8ff0c6; --fin-2: #10a874; --fin-edge: #064a37;
+    --bad-1: #fecaca; --bad-2: #e43d3d; --bad-edge: #7a1717;
+    --dig-hi: rgba(255, 255, 255, .10);
+    --dig-drop: rgba(0, 0, 0, .55);
     color-scheme: dark;
 }
 
@@ -335,7 +348,28 @@ select option { background: var(--bg); color: var(--text); }
 .tile .digits {
     color: var(--text-strong);
     letter-spacing: -.01em;
-    text-shadow: 0 .015em 0 var(--sh-light);
+}
+
+/* ---------- 3D embossed digits ----------
+   Each digit face gets a lit-from-above gradient; chained drop-shadows then
+   add an extruded edge underneath, a soft cast shadow and a bright rim. */
+.d3 {
+    --g1: var(--dig-1); --g2: var(--dig-2); --edge: var(--dig-edge);
+    filter:
+        drop-shadow(0 .012em 0 var(--edge))
+        drop-shadow(0 .012em 0 var(--edge))
+        drop-shadow(.01em .045em .045em var(--dig-drop))
+        drop-shadow(-.008em -.01em 0 var(--dig-hi));
+}
+.d3-accent { --g1: var(--acc-1); --g2: var(--acc-2); --edge: var(--acc-edge); color: var(--accent); }
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .d3 .d {
+        background: linear-gradient(180deg, var(--g1) 18%, var(--g2) 86%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+    }
 }
 
 .colon {
@@ -394,6 +428,7 @@ select option { background: var(--bg); color: var(--text); }
     height: 100%;
     border-radius: 999px;
     background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), inset 0 -1px 1px rgba(0, 0, 0, .18);
     transform-origin: left center;
     transform: scaleX(0);
 }
@@ -618,18 +653,17 @@ select option { background: var(--bg); color: var(--text); }
     height: 100%;
     border-radius: 999px;
     background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), inset 0 -1px 1px rgba(0, 0, 0, .18);
     transition: background .3s ease;
 }
 
 .timer-run.is-paused .timer-tiles .digits { animation: blink 1.6s ease-in-out infinite; }
-/* Final 10 seconds: strong emerald green */
-.timer-run.is-final .timer-tiles .digits,
+/* Final 10 seconds: deep, shaded emerald */
+.timer-run.is-final .timer-tiles .d3 { --g1: var(--fin-1); --g2: var(--fin-2); --edge: var(--fin-edge); color: var(--final); }
 .timer-run.is-final .timer-label { color: var(--final); }
-.timer-run.is-final .timer-fill {
-    background: linear-gradient(90deg, var(--final), var(--final-2));
-    box-shadow: 0 0 10px var(--final-glow);
-}
-.timer-run.is-done .timer-tiles .digits,
+.timer-run.is-final .timer-fill { background: linear-gradient(90deg, var(--fin-1), var(--fin-2)); }
+/* Time's up: shaded red */
+.timer-run.is-done .timer-tiles .d3 { --g1: var(--bad-1); --g2: var(--bad-2); --edge: var(--bad-edge); color: var(--danger); }
 .timer-run.is-done .timer-label { color: var(--danger); }
 .timer-run.is-done .timer-tiles .tile { animation: pulse-alert 1s ease-in-out infinite; }
 
