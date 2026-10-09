@@ -13,7 +13,9 @@
     --accent-2: #8b5cf6;
     --accent-soft: rgba(88, 101, 242, .12);
     --danger: #ef4444;
-    --warn: #f59e0b;
+    --final: #059669;
+    --final-2: #22c55e;
+    --final-glow: rgba(16, 185, 129, .45);
     --radius-xl: 2.25rem;
     color-scheme: light;
 }
@@ -29,6 +31,9 @@
         --accent: #8390ff;
         --accent-2: #a78bfa;
         --accent-soft: rgba(131, 144, 255, .16);
+        --final: #34d399;
+        --final-2: #4ade80;
+        --final-glow: rgba(52, 211, 153, .45);
         color-scheme: dark;
     }
 }
@@ -43,6 +48,9 @@
     --accent: #8390ff;
     --accent-2: #a78bfa;
     --accent-soft: rgba(131, 144, 255, .16);
+    --final: #34d399;
+    --final-2: #4ade80;
+    --final-glow: rgba(52, 211, 153, .45);
     color-scheme: dark;
 }
 
@@ -614,9 +622,13 @@ select option { background: var(--bg); color: var(--text); }
 }
 
 .timer-run.is-paused .timer-tiles .digits { animation: blink 1.6s ease-in-out infinite; }
-.timer-run.is-warn .timer-tiles .digits,
-.timer-run.is-warn .timer-label { color: var(--warn); }
-.timer-run.is-warn .timer-fill { background: var(--warn); }
+/* Final 10 seconds: strong emerald green */
+.timer-run.is-final .timer-tiles .digits,
+.timer-run.is-final .timer-label { color: var(--final); }
+.timer-run.is-final .timer-fill {
+    background: linear-gradient(90deg, var(--final), var(--final-2));
+    box-shadow: 0 0 10px var(--final-glow);
+}
 .timer-run.is-done .timer-tiles .digits,
 .timer-run.is-done .timer-label { color: var(--danger); }
 .timer-run.is-done .timer-tiles .tile { animation: pulse-alert 1s ease-in-out infinite; }

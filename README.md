@@ -14,7 +14,7 @@ A clean, neumorphic **world clock & countdown timer** that installs on your phon
 - **Countdown timer:**
   - *Duration* mode with quick presets (1m to 1h), plus pause, resume, and +1 minute.
   - *Target time* mode counts down to a date and time in any time zone.
-  - Hours, minutes and seconds each in their own tile, with milliseconds below and a progress bar that drains as time runs out. Everything turns amber in the last 10 seconds.
+  - Hours, minutes and seconds each in their own tile, with milliseconds below and a progress bar that drains as time runs out. Everything turns green in the last 10 seconds.
   - When the timer ends, an alarm beeps and the phone vibrates.
   - The timer keeps running if you close the app.
 - **Light and dark themes.** Follows your system setting by default; tap the moon or sun to switch.

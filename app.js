@@ -694,7 +694,7 @@
 
         runView.classList.toggle('is-paused', s === 'paused');
         runView.classList.toggle('is-done', s === 'done');
-        if (s !== 'running') runView.classList.remove('is-warn');
+        if (s !== 'running') runView.classList.remove('is-final');
 
         if (s === 'running') timerLabel.textContent = `Ends ${endFmt(timer.endAt)}`;
         else if (s === 'paused') timerLabel.textContent = 'Paused';
@@ -726,7 +726,7 @@
         // Progress bar drains from full to empty as time runs out.
         const progress = timer.total > 0 ? Math.min(1, rem / timer.total) : 0;
         timerFill.style.width = `${(progress * 100).toFixed(3)}%`;
-        runView.classList.toggle('is-warn', timer.state === 'running' && rem <= 10000);
+        runView.classList.toggle('is-final', timer.state === 'running' && rem <= 10000);
 
         const title = timer.state === 'done' ? "⏰ Time's up · Clucky"
             : `${timer.state === 'paused' ? '❚❚' : '▶'} ${str} · Clucky`;
