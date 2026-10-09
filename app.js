@@ -20,15 +20,22 @@
 
     const settings = Object.assign({
         tab: 'clock',
-        tz: 'Asia/Manila',
+        tz: 'local',
+        tzManual: false,
+        geoZone: '',
         h24: false,
         theme: 'auto',
         mode: 'duration',
         dur: [0, 5, 0],
-        targetTz: 'Asia/Manila',
+        targetTz: 'local',
+        targetTzManual: false,
         targetValue: '',
         iosHintSeen: false,
     }, store.get(SETTINGS_KEY, {}));
+
+    // Unless the user picked a zone themselves, always follow the device's real time zone.
+    if (!settings.tzManual) settings.tz = 'local';
+    if (!settings.targetTzManual) settings.targetTz = 'local';
 
     const saveSettings = () => store.set(SETTINGS_KEY, settings);
 
@@ -129,26 +136,55 @@
         return `GMT${sign}${Math.floor(a / 60)}${a % 60 ? ':' + pad(a % 60) : ''}`;
     }
 
-    const localZoneName = (() => {
+    // The device's own IANA time zone (e.g. "Asia/Manila"). Re-read on resume
+    // so the clock follows the phone when it changes zones while travelling.
+    const readDeviceZone = () => {
         try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { return ''; }
-    })();
+    };
+    let deviceZone = readDeviceZone();
+
+    const isValidZone = (tz) => {
+        try { new Intl.DateTimeFormat('en-US', { timeZone: tz }); return true; } catch (e) { return false; }
+    };
+
+    function zoneCity(tz) {
+        if (tz === 'local') tz = deviceZone;
+        const known = ZONES.find(([v]) => v === tz);
+        if (known) return known[1];
+        return (tz.split('/').pop() || tz).replace(/_/g, ' ');
+    }
 
     function fillZoneSelect(select, selected) {
         const now = Date.now();
-        select.innerHTML = '';
+        const options = [];
+        const deviceLabel = deviceZone ? `${zoneCity('local')} · ${offsetLabel(now, 'local')}` : offsetLabel(now, 'local');
+        options.push(['local', `Auto · ${deviceLabel}`]);
+        if (settings.geoZone && isValidZone(settings.geoZone)) {
+            options.push([settings.geoZone, `📍 ${zoneCity(settings.geoZone)} · ${offsetLabel(now, settings.geoZone)}`]);
+        }
         for (const [value, name] of ZONES) {
+            if (value === 'local' || value === settings.geoZone) continue;
+            options.push([value, `${name} · ${offsetLabel(now, value)}`]);
+        }
+        select.innerHTML = '';
+        for (const [value, label] of options) {
             const opt = document.createElement('option');
             opt.value = value;
-            if (value === 'local') {
-                const city = localZoneName.split('/').pop().replace(/_/g, ' ');
-                opt.textContent = city ? `Local · ${city}` : 'Local time';
-            } else {
-                opt.textContent = `${name} · ${offsetLabel(now, value)}`;
-            }
+            opt.textContent = label;
             select.appendChild(opt);
         }
-        select.value = ZONES.some(([v]) => v === selected) ? selected : 'local';
+        select.value = options.some(([v]) => v === selected) ? selected : 'local';
         return select.value;
+    }
+
+    // Small status message at the bottom of the screen.
+    const notice = $('notice');
+    let noticeTimer = 0;
+    function notify(msg, ms = 3800) {
+        notice.textContent = msg;
+        notice.hidden = false;
+        clearTimeout(noticeTimer);
+        noticeTimer = setTimeout(() => { notice.hidden = true; }, ms);
     }
 
     // ---------------------------------------------------------------
@@ -258,7 +294,7 @@
             clockAmPm.textContent = p.hour >= 12 ? 'PM' : 'AM';
             clockAmPm.hidden = settings.h24;
             clockDate.textContent = dateFormatter(tz).format(now);
-            clockOffset.textContent = offsetLabel(now, tz);
+            clockOffset.textContent = `${zoneCity(tz)} · ${offsetLabel(now, tz)}`;
             $('clock-main').setAttribute('aria-label', `${pad(h)}:${pad(p.minute)}${settings.h24 ? '' : ' ' + clockAmPm.textContent}`);
         }
     }
@@ -277,7 +313,77 @@
 
     clockTz.addEventListener('change', () => {
         settings.tz = clockTz.value;
+        settings.tzManual = settings.tz !== 'local';
         saveSettings();
+    });
+
+    // --- Detect the time zone from the device's location ---
+    const btnLocate = $('btn-locate');
+    let tzLookupLoading = null;
+
+    function loadTzLookup() {
+        if (window.tzlookup) return Promise.resolve(window.tzlookup);
+        if (!tzLookupLoading) {
+            tzLookupLoading = new Promise((resolve, reject) => {
+                const sc = document.createElement('script');
+                sc.src = 'vendor/tz-lookup.js';
+                sc.onload = () => (window.tzlookup ? resolve(window.tzlookup) : reject(new Error('tz-lookup missing')));
+                sc.onerror = () => { tzLookupLoading = null; reject(new Error('tz-lookup failed to load')); };
+                document.head.appendChild(sc);
+            });
+        }
+        return tzLookupLoading;
+    }
+
+    function getPosition() {
+        return new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+                enableHighAccuracy: false, timeout: 15000, maximumAge: 10 * 60 * 1000,
+            });
+        });
+    }
+
+    function useDeviceZone(msg) {
+        settings.tz = 'local';
+        settings.tzManual = false;
+        saveSettings();
+        fillZoneSelect(clockTz, settings.tz);
+        notify(msg);
+    }
+
+    btnLocate.addEventListener('click', async () => {
+        if (btnLocate.classList.contains('is-busy')) return;
+        if (!('geolocation' in navigator) || !window.isSecureContext) {
+            useDeviceZone(`Location isn't available here. Using your device time zone (${zoneCity('local')}).`);
+            return;
+        }
+        btnLocate.classList.add('is-busy');
+        notify('Finding your location…', 15000);
+        try {
+            const [lookup, pos] = await Promise.all([loadTzLookup(), getPosition()]);
+            const zone = lookup(pos.coords.latitude, pos.coords.longitude);
+            if (!zone || !isValidZone(zone)) throw new Error('unknown zone');
+            settings.geoZone = zone;
+            settings.tz = zone;
+            settings.tzManual = true;
+            saveSettings();
+            fillZoneSelect(clockTz, zone);
+            fillZoneSelect(inputTargetTz, settings.targetTz);
+            const now = Date.now();
+            let msg = `📍 Time zone set to ${zoneCity(zone)} (${offsetLabel(now, zone)})`;
+            if (deviceZone && zone !== deviceZone && zoneOffset(now, zone) !== zoneOffset(now, 'local')) {
+                msg += ` — note: your device is set to ${zoneCity('local')}`;
+            }
+            notify(msg, 5000);
+        } catch (err) {
+            if (err && err.code === 1) {
+                useDeviceZone(`Location permission denied. Using your device time zone (${zoneCity('local')}).`);
+            } else {
+                useDeviceZone(`Couldn't get your location. Using your device time zone (${zoneCity('local')}).`);
+            }
+        } finally {
+            btnLocate.classList.remove('is-busy');
+        }
     });
 
     // ---------------------------------------------------------------
@@ -435,6 +541,7 @@
     });
     inputTargetTz.addEventListener('change', () => {
         settings.targetTz = inputTargetTz.value;
+        settings.targetTzManual = settings.targetTz !== 'local';
         saveSettings();
         updateTargetHint(Date.now());
     });
@@ -707,6 +814,15 @@
 
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') {
+            // Phone changed time zone (e.g. after a flight)? Follow it.
+            const z = readDeviceZone();
+            if (z !== deviceZone) {
+                deviceZone = z;
+                dateFmtCache.delete('local');
+                fillZoneSelect(clockTz, settings.tz);
+                fillZoneSelect(inputTargetTz, settings.targetTz);
+                lastClockKey = '';
+            }
             if (document.body.classList.contains('focus')) requestWakeLock();
             tick();
         }

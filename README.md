@@ -8,7 +8,9 @@ A clean, neumorphic **world clock & countdown timer** that installs on your phon
 
 - **Big, bold time.** Huge digits that scale to fill any screen, with a seconds progress bar and a blinking colon.
 - **Focus mode** (⛶ button, `F`, or double-click the clock): hides everything but the time, goes fullscreen, and keeps the screen awake. Works as a desk or bedside clock.
-- **World clock** with 16 time zones plus your local time, a 12/24-hour toggle, and the date with its GMT offset.
+- **Your real time zone, automatically.** The clock follows your device's time zone, including daylight saving, and updates if your phone changes zones while you travel.
+- **📍 Detect from location:** tap the pin to set the time zone from your GPS position. The lookup runs on the device, so no location data is sent anywhere.
+- **World clock** with 16 more time zones, a 12/24-hour toggle, and the date with the zone name and GMT offset.
 - **Countdown timer:**
   - *Duration* mode with quick presets (1m to 1h), plus pause, resume, and +1 minute.
   - *Target time* mode counts down to a date and time in any time zone.
@@ -16,6 +18,7 @@ A clean, neumorphic **world clock & countdown timer** that installs on your phon
   - When the timer ends, an alarm beeps and the phone vibrates.
   - The timer keeps running if you close the app.
 - **Light and dark themes.** Follows your system setting by default; tap the moon or sun to switch.
+- **Fits every screen:** phones (portrait and landscape), tablets, and desktops. Tested on iPhone 15 Pro Max, Pixel 9 Pro XL, and Oppo Pad 3 screen sizes.
 - **Installable PWA** that works offline after the first visit.
 - **Keyboard shortcuts:** `C` for Clock, `T` for Timer, `Space` to start or pause, `F` for focus, `Esc` to exit focus.
 
@@ -47,4 +50,5 @@ The service worker caches the app for offline use. When you change any file, **b
 | `manifest.webmanifest` | PWA metadata (name, icons, screenshots, shortcuts) |
 | `sw.js` | Service worker for offline support |
 | `icons/` | App icons (SVG sources and generated PNGs) |
+| `vendor/tz-lookup.js` | Offline coordinates → time zone lookup ([@photostructure/tz-lookup](https://github.com/photostructure/tz-lookup), CC0) |
 | `screenshots/` | Screenshots used by the install dialog |

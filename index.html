@@ -46,6 +46,7 @@
         <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></symbol>
         <symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></symbol>
         <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+        <symbol id="i-pin" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></symbol>
         <symbol id="i-share" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></symbol>
     </svg>
 
@@ -89,7 +90,12 @@
                         <select id="clock-tz"></select>
                         <svg class="icon sm chev" aria-hidden="true"><use href="#i-chevron"/></svg>
                     </label>
-                    <button id="btn-format" class="chip neu-out-sm" type="button" title="Switch 12/24-hour format">12H</button>
+                    <div class="head-actions">
+                        <button id="btn-locate" class="chip icon-chip neu-out-sm" type="button" aria-label="Detect my time zone from my location" title="Detect time zone from my location">
+                            <svg class="icon sm"><use href="#i-pin"/></svg>
+                        </button>
+                        <button id="btn-format" class="chip neu-out-sm" type="button" title="Switch 12/24-hour format">12H</button>
+                    </div>
                 </div>
 
                 <div class="card-body clock-body">
@@ -214,6 +220,8 @@
     <button id="btn-exit-focus" class="exit-focus icon-btn neu-out-sm" type="button" aria-label="Exit focus mode" title="Exit focus (Esc)">
         <svg class="icon"><use href="#i-shrink"/></svg>
     </button>
+
+    <div id="notice" class="notice neu-out-sm" role="status" aria-live="polite" hidden></div>
 
     <div id="ios-hint" class="toast neu-out" role="dialog" aria-live="polite" hidden>
         <img src="icons/icon.svg" width="40" height="40" alt="">
