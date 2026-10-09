@@ -29,12 +29,13 @@ A clean, neumorphic **world clock & countdown timer** that installs on your phon
 
 ## Deploy to GitHub Pages
 
-1. Push this repository to GitHub.
-2. Go to **Settings → Pages**.
-3. Under **Build and deployment**, choose **Deploy from a branch**, then pick your branch and the `/ (root)` folder.
-4. After about a minute the app is live at `https://<your-username>.github.io/Clucky/`.
+The repository includes a workflow (`.github/workflows/deploy-pages.yml`) that publishes the app on every push.
 
-All paths are relative, so it works from a project subpath without any configuration. `.nojekyll` makes Pages serve the files as they are.
+1. **One-time setup:** go to **Settings → Pages → Build and deployment** and set **Source** to **GitHub Actions**.
+2. Push, or run the **Deploy to GitHub Pages** workflow from the **Actions** tab.
+3. The app is live at `https://<your-username>.github.io/Clucky/`.
+
+All paths are relative, so it works from a project subpath without any configuration.
 
 ### Shipping updates
 
