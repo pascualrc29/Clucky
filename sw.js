@@ -1,6 +1,6 @@
 // Clucky service worker — offline support.
 // Bump VERSION whenever you change any app file so installed apps pick up the update.
-const VERSION = 'clucky-v4';
+const VERSION = 'clucky-v5';
 const FONT_CACHE = 'clucky-fonts';
 
 const SHELL = [

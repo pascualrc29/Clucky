@@ -455,6 +455,7 @@
     const ring = $('timer-run');
     const ringBar = $('ring-bar');
     const timerDigits = $('timer-digits');
+    const timerS = $('timer-s');
     const timerMs = $('timer-ms');
     const timerLabel = $('timer-label');
     const btnStart = $('btn-start');
@@ -547,18 +548,15 @@
         updateTargetHint(Date.now());
     });
 
-    // Exact remaining time split into "MM:SS" (or "H:MM:SS") and ".mmm".
-    // A 5-minute timer reads 05:00.000 when it starts and 00:00.000 when it rings.
+    // Exact remaining time, laid out like the clock: "HH:MM" big, then "SS" and ".mmm".
+    // A 5-minute timer reads 00:05 · 00.000 when it starts and 00:00 · 00.000 when it rings.
     function formatCountdown(ms) {
         ms = Math.max(0, Math.floor(ms));
         const totalSec = Math.floor(ms / 1000);
-        const h = Math.floor(totalSec / 3600);
-        const m = Math.floor((totalSec % 3600) / 60);
-        const sec = totalSec % 60;
-        return {
-            main: h > 0 ? `${h}:${pad(m)}:${pad(sec)}` : `${pad(m)}:${pad(sec)}`,
-            ms: '.' + pad(ms % 1000, 3),
-        };
+        const hm = `${pad(Math.floor(totalSec / 3600))}:${pad(Math.floor((totalSec % 3600) / 60))}`;
+        const ss = pad(totalSec % 60);
+        const mmm = '.' + pad(ms % 1000, 3);
+        return { hm, ss, mmm, full: `${hm}:${ss}` };
     }
 
     function updateTargetHint(now) {
@@ -571,7 +569,7 @@
             targetHint.classList.add('bad');
         } else {
             const c = formatCountdown(target - now);
-            targetHint.textContent = `Countdown: ${c.main}${c.ms}`;
+            targetHint.textContent = `Countdown: ${c.full}${c.mmm}`;
             targetHint.classList.remove('bad');
         }
     }
@@ -716,10 +714,12 @@
         const rem = timer.state === 'running' ? Math.min(timer.total, Math.max(0, timer.endAt - now))
             : timer.state === 'paused' ? timer.remaining : 0;
 
-        const { main: str, ms } = formatCountdown(rem);
-        renderDigits(timerDigits, str);
-        renderDigits(timerMs, ms);
-        timerDigits.dataset.len = str.length;
+        const c = formatCountdown(rem);
+        renderDigits(timerDigits, c.hm);
+        renderDigits(timerS, c.ss);
+        renderDigits(timerMs, c.mmm);
+        timerDigits.dataset.len = c.hm.length;
+        const str = c.full;
 
         const progress = timer.total > 0 ? Math.min(1, rem / timer.total) : 0;
         ringBar.style.strokeDashoffset = String(RING_C * (1 - progress));

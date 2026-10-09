@@ -577,21 +577,26 @@ select option { background: var(--bg); color: var(--text); }
     gap: 2.5cqi;
 }
 .timer-digits {
-    font-size: 21cqi;
+    font-size: 20cqi;
     color: var(--text-strong);
     text-shadow: 0 .015em 0 var(--sh-light);
 }
-.timer-digits[data-len="7"] { font-size: 15.5cqi; }
-.timer-digits[data-len="8"] { font-size: 14cqi; }
-.timer-digits[data-len="9"] { font-size: 12.5cqi; }
-.timer-ms-pill {
-    padding: .18em .55em;
-    border-radius: .5em;
-    font-size: 7cqi;
+/* 3+ digit hours (long target-time countdowns) */
+.timer-digits[data-len="6"] { font-size: 16.5cqi; }
+.timer-digits[data-len="7"] { font-size: 14cqi; }
+.timer-digits[data-len="8"] { font-size: 12.5cqi; }
+
+/* Seconds + milliseconds, same style as the clock's seconds pill */
+.timer-sec-pill {
+    display: flex;
+    align-items: baseline;
+    padding: .14em .42em;
+    border-radius: .4em;
+    font-size: 10cqi;
 }
-.timer-ms-pill .digits { color: var(--accent); font-weight: 700; }
-.ring.is-warn .timer-ms-pill .digits { color: var(--warn); }
-.ring.is-done .timer-ms-pill .digits { color: var(--danger); }
+.timer-sec-pill > .digits:first-child { color: var(--accent); }
+.ring.is-warn .timer-sec-pill > .digits:first-child { color: var(--warn); }
+.ring.is-done .timer-sec-pill > .digits:first-child { color: var(--danger); }
 
 .timer-label {
     min-height: 1.3em;
