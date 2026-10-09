@@ -579,7 +579,6 @@ select option { background: var(--bg); color: var(--text); }
 .timer-digits[data-len="7"] { font-size: 15.5cqi; }
 .timer-digits[data-len="8"] { font-size: 14cqi; }
 .timer-digits[data-len="9"] { font-size: 12.5cqi; }
-.timer-ms { font-size: 6cqi; font-weight: 600; color: var(--muted); }
 .timer-label {
     min-height: 1.3em;
     font-size: 4.2cqi;
@@ -640,6 +639,23 @@ select option { background: var(--bg); color: var(--text); }
     40%, 80% { transform: translateX(6px); }
 }
 
+/* ---------- Footer ---------- */
+.footer {
+    text-align: center;
+    font-size: .75rem;
+    font-weight: 500;
+    letter-spacing: .02em;
+    color: var(--muted);
+}
+.footer a {
+    font-weight: 700;
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color .2s ease;
+}
+.footer a:hover { border-bottom-color: currentColor; }
+
 /* ---------- Focus mode (big desk clock) ---------- */
 .exit-focus {
     position: fixed;
@@ -653,7 +669,8 @@ select option { background: var(--bg); color: var(--text); }
 
 body.focus .exit-focus { display: grid; }
 body.focus .chrome,
-body.focus .card-head { display: none; }
+body.focus .card-head,
+body.focus .footer { display: none; }
 body.focus .app { max-width: none; }
 body.focus main > .card {
     max-height: none;
@@ -673,7 +690,7 @@ body.focus .ring { width: min(84cqi, 62vh); }
 
 /* ---------- Landscape phones ---------- */
 @media (orientation: landscape) and (max-height: 560px) {
-    .app { max-width: 64rem; gap: 12px; padding-top: calc(env(safe-area-inset-top) + 10px); padding-bottom: calc(env(safe-area-inset-bottom) + 12px); }
+    .app { max-width: 64rem; gap: 10px; padding-top: calc(env(safe-area-inset-top) + 10px); padding-bottom: calc(env(safe-area-inset-bottom) + 12px); }
     .chrome { flex-direction: row; align-items: center; gap: 16px; }
     .topbar { display: contents; }
     .brand { margin-right: auto; }
@@ -689,7 +706,7 @@ body.focus .ring { width: min(84cqi, 62vh); }
 
     /* Clock: digits left, details right */
     .clock-body { flex-direction: row; gap: 4cqi; }
-    .clock-main { font-size: min(18cqi, 36vh); }
+    .clock-main { font-size: min(18cqi, 29vh); }
     .clock-meta { width: auto; gap: 14px; }
     .sec-track { width: 12rem; }
     .clock-date { flex-direction: column; gap: 6px; font-size: .85rem; }
@@ -700,13 +717,13 @@ body.focus .ring { width: min(84cqi, 62vh); }
     #view-timer .seg button { padding: 7px 0; }
     .timer-body { grid-column: 1; grid-row: 2; height: 100%; gap: 12px; }
     .setup { gap: 14px; }
-    .dur { font-size: min(10cqi, 12.5vh); }
+    .dur { font-size: min(10cqi, 11vh); }
     .dur-field { gap: 6px; }
     .presets { max-width: none; gap: 8px; }
     .preset { padding: 6px 10px; }
     .target { max-width: 26rem; }
     .field input, .field select { height: 42px; }
-    .ring { width: min(50cqi, 56vh); }
+    .ring { width: min(50cqi, 48vh); }
     .controls { grid-column: 2; grid-row: 2; flex-direction: column; gap: 14px; min-height: 0; }
     .round { width: 50px; height: 50px; }
     .round.big { width: 64px; height: 64px; }

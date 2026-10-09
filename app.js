@@ -349,7 +349,6 @@
     const ring = $('timer-run');
     const ringBar = $('ring-bar');
     const timerDigits = $('timer-digits');
-    const timerMs = $('timer-ms');
     const timerLabel = $('timer-label');
     const btnStart = $('btn-start');
     const btnPause = $('btn-pause');
@@ -440,16 +439,14 @@
         updateTargetHint(Date.now());
     });
 
-    function humanDuration(ms) {
-        const totalMin = Math.ceil(ms / 60000);
-        const d = Math.floor(totalMin / 1440);
-        const h = Math.floor((totalMin % 1440) / 60);
-        const m = totalMin % 60;
-        const out = [];
-        if (d) out.push(`${d}d`);
-        if (h) out.push(`${h}h`);
-        if (m || !out.length) out.push(`${m}m`);
-        return out.join(' ');
+    // Countdown text, rounded *up* to the whole second like a real timer:
+    // it reads 05:00 the moment it starts and 00:00 exactly when it rings.
+    function formatCountdown(ms) {
+        const totalSec = Math.max(0, Math.ceil(ms / 1000));
+        const h = Math.floor(totalSec / 3600);
+        const m = Math.floor((totalSec % 3600) / 60);
+        const sec = totalSec % 60;
+        return h > 0 ? `${h}:${pad(m)}:${pad(sec)}` : `${pad(m)}:${pad(sec)}`;
     }
 
     function updateTargetHint(now) {
@@ -461,7 +458,7 @@
             targetHint.textContent = 'That time has already passed';
             targetHint.classList.add('bad');
         } else {
-            targetHint.textContent = `Counts down ${humanDuration(target - now)}`;
+            targetHint.textContent = `Countdown: ${formatCountdown(target - now)}`;
             targetHint.classList.remove('bad');
         }
     }
@@ -602,18 +599,13 @@
 
     function renderTimerDisplay(now) {
         if (timer.state === 'idle') return;
-        const rem = timer.state === 'running' ? Math.max(0, timer.endAt - now)
+        // Clamp to the total so a clock that steps backwards can't show more than the timer length.
+        const rem = timer.state === 'running' ? Math.min(timer.total, Math.max(0, timer.endAt - now))
             : timer.state === 'paused' ? timer.remaining : 0;
 
-        const totalSec = Math.floor(rem / 1000);
-        const h = Math.floor(totalSec / 3600);
-        const m = Math.floor((totalSec % 3600) / 60);
-        const sec = totalSec % 60;
-        const str = h > 0 ? `${h}:${pad(m)}:${pad(sec)}` : `${pad(m)}:${pad(sec)}`;
-
+        const str = formatCountdown(rem);
         renderDigits(timerDigits, str);
         timerDigits.dataset.len = str.length;
-        renderDigits(timerMs, '.' + pad(rem % 1000, 3));
 
         const progress = timer.total > 0 ? Math.min(1, rem / timer.total) : 0;
         ringBar.style.strokeDashoffset = String(RING_C * (1 - progress));
