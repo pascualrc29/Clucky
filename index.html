@@ -178,24 +178,28 @@
                     </div>
 
                     <!-- Running display -->
-                    <div id="timer-run" class="ring neu-out" hidden>
-                        <svg viewBox="0 0 200 200" aria-hidden="true">
-                            <defs>
-                                <linearGradient id="ring-grad" x1="0" y1="0" x2="1" y2="1">
-                                    <stop offset="0" style="stop-color:var(--accent)"/>
-                                    <stop offset="1" style="stop-color:var(--accent-2)"/>
-                                </linearGradient>
-                            </defs>
-                            <circle class="ring-track" cx="100" cy="100" r="91"/>
-                            <circle id="ring-bar" class="ring-bar" cx="100" cy="100" r="91"/>
-                        </svg>
-                        <div class="ring-inner neu-in" id="ring-inner">
-                            <div id="timer-digits" class="digits timer-digits" role="timer">00:00</div>
-                            <div class="timer-sec-pill neu-in-sm">
-                                <span id="timer-s" class="digits">00</span><span id="timer-ms" class="digits ms">.000</span>
+                    <div id="timer-run" class="timer-run" hidden>
+                        <div id="timer-tiles" class="timer-tiles" role="timer">
+                            <div class="t-unit">
+                                <div class="tile neu-in"><span id="timer-h" class="digits">00</span></div>
+                                <span class="t-label">Hours</span>
                             </div>
+                            <div class="colon" aria-hidden="true"><i></i><i></i></div>
+                            <div class="t-unit">
+                                <div class="tile neu-in"><span id="timer-m" class="digits">00</span></div>
+                                <span class="t-label">Mins</span>
+                            </div>
+                            <div class="colon" aria-hidden="true"><i></i><i></i></div>
+                            <div class="t-unit">
+                                <div class="tile neu-in sec-tile"><span id="timer-s" class="digits">00</span></div>
+                                <span class="t-label">Secs</span>
+                            </div>
+                        </div>
+                        <div class="timer-sub">
+                            <div class="ms-pill neu-in-sm"><span id="timer-ms" class="digits">.000</span></div>
                             <div id="timer-label" class="timer-label">&nbsp;</div>
                         </div>
+                        <div class="timer-track neu-in-sm" aria-hidden="true"><div id="timer-fill" class="timer-fill"></div></div>
                     </div>
                 </div>
 

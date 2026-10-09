@@ -438,8 +438,6 @@
     // ---------------------------------------------------------------
     // Timer
     // ---------------------------------------------------------------
-    const RING_C = 2 * Math.PI * 91;
-
     const inputH = $('input-h');
     const inputM = $('input-m');
     const inputS = $('input-s');
@@ -452,9 +450,11 @@
     const inputTargetTime = $('input-target-time');
     const inputTargetTz = $('input-target-tz');
     const targetHint = $('target-hint');
-    const ring = $('timer-run');
-    const ringBar = $('ring-bar');
-    const timerDigits = $('timer-digits');
+    const runView = $('timer-run');
+    const timerTiles = $('timer-tiles');
+    const timerH = $('timer-h');
+    const timerM = $('timer-m');
+    const timerFill = $('timer-fill');
     const timerS = $('timer-s');
     const timerMs = $('timer-ms');
     const timerLabel = $('timer-label');
@@ -548,15 +548,16 @@
         updateTargetHint(Date.now());
     });
 
-    // Exact remaining time, laid out like the clock: "HH:MM" big, then "SS" and ".mmm".
-    // A 5-minute timer reads 00:05 · 00.000 when it starts and 00:00 · 00.000 when it rings.
+    // Exact remaining time as HH / MM / SS / .mmm.
+    // A 5-minute timer reads 00:05:00.000 when it starts and 00:00:00.000 when it rings.
     function formatCountdown(ms) {
         ms = Math.max(0, Math.floor(ms));
         const totalSec = Math.floor(ms / 1000);
-        const hm = `${pad(Math.floor(totalSec / 3600))}:${pad(Math.floor((totalSec % 3600) / 60))}`;
+        const hh = pad(Math.floor(totalSec / 3600));
+        const mm = pad(Math.floor((totalSec % 3600) / 60));
         const ss = pad(totalSec % 60);
         const mmm = '.' + pad(ms % 1000, 3);
-        return { hm, ss, mmm, full: `${hm}:${ss}` };
+        return { hh, mm, ss, mmm, full: `${hh}:${mm}:${ss}` };
     }
 
     function updateTargetHint(now) {
@@ -669,7 +670,7 @@
     btnPause.addEventListener('click', pauseTimer);
     btnReset.addEventListener('click', resetTimer);
     btnAdd.addEventListener('click', addMinute);
-    ring.addEventListener('click', () => { if (timer.state === 'done') stopAlarm(); });
+    runView.addEventListener('click', () => { if (timer.state === 'done') stopAlarm(); });
 
     const endFmt = (epoch) => new Date(epoch).toLocaleTimeString('en-US', {
         hour: 'numeric', minute: '2-digit', hour12: !settings.h24,
@@ -684,16 +685,16 @@
         modeGroup.hidden = !idle;
         setupDuration.hidden = !idle || settings.mode !== 'duration';
         setupTarget.hidden = !idle || settings.mode !== 'target';
-        ring.hidden = idle;
+        runView.hidden = idle;
 
         btnStart.hidden = !(idle || s === 'paused' || (s === 'done' && durationRun));
         btnStart.setAttribute('aria-label', s === 'paused' ? 'Resume' : s === 'done' ? 'Restart' : 'Start');
         btnPause.hidden = !(s === 'running' && durationRun);
         btnAdd.hidden = !(durationRun && (s === 'running' || s === 'paused' || s === 'done'));
 
-        ring.classList.toggle('is-paused', s === 'paused');
-        ring.classList.toggle('is-done', s === 'done');
-        if (s !== 'running') ring.classList.remove('is-warn');
+        runView.classList.toggle('is-paused', s === 'paused');
+        runView.classList.toggle('is-done', s === 'done');
+        if (s !== 'running') runView.classList.remove('is-warn');
 
         if (s === 'running') timerLabel.textContent = `Ends ${endFmt(timer.endAt)}`;
         else if (s === 'paused') timerLabel.textContent = 'Paused';
@@ -715,15 +716,17 @@
             : timer.state === 'paused' ? timer.remaining : 0;
 
         const c = formatCountdown(rem);
-        renderDigits(timerDigits, c.hm);
+        renderDigits(timerH, c.hh);
+        renderDigits(timerM, c.mm);
         renderDigits(timerS, c.ss);
         renderDigits(timerMs, c.mmm);
-        timerDigits.dataset.len = c.hm.length;
+        timerTiles.dataset.hlen = String(c.hh.length);
         const str = c.full;
 
+        // Progress bar drains from full to empty as time runs out.
         const progress = timer.total > 0 ? Math.min(1, rem / timer.total) : 0;
-        ringBar.style.strokeDashoffset = String(RING_C * (1 - progress));
-        ring.classList.toggle('is-warn', timer.state === 'running' && rem <= 10000);
+        timerFill.style.width = `${(progress * 100).toFixed(3)}%`;
+        runView.classList.toggle('is-warn', timer.state === 'running' && rem <= 10000);
 
         const title = timer.state === 'done' ? "⏰ Time's up · Clucky"
             : `${timer.state === 'paused' ? '❚❚' : '▶'} ${str} · Clucky`;

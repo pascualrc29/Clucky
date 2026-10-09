@@ -541,83 +541,88 @@ select option { background: var(--bg); color: var(--text); }
 }
 .hint.bad { color: var(--danger); }
 
-/* ---------- Timer: ring ---------- */
-.ring {
-    position: relative;
-    container-type: inline-size;
-    width: min(84cqi, 20rem);
-    aspect-ratio: 1;
-    border-radius: 50%;
-}
-.ring svg {
-    position: absolute;
-    inset: 0;
+/* ---------- Timer: running display ---------- */
+.timer-run {
     width: 100%;
-    height: 100%;
-    transform: rotate(-90deg);
-}
-.ring-track { fill: none; stroke: var(--accent-soft); stroke-width: 6; }
-.ring-bar {
-    fill: none;
-    stroke: url(#ring-grad);
-    stroke-width: 7;
-    stroke-linecap: round;
-    stroke-dasharray: 571.77;
-    stroke-dashoffset: 0;
-    transition: stroke .3s ease;
-}
-.ring-inner {
-    position: absolute;
-    inset: 11.5%;
-    border-radius: 50%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 2.5cqi;
+    gap: clamp(14px, 2.6vh, 26px);
 }
-.timer-digits {
-    font-size: 20cqi;
-    color: var(--text-strong);
-    text-shadow: 0 .015em 0 var(--sh-light);
-}
-/* 3+ digit hours (long target-time countdowns) */
-.timer-digits[data-len="6"] { font-size: 16.5cqi; }
-.timer-digits[data-len="7"] { font-size: 14cqi; }
-.timer-digits[data-len="8"] { font-size: 12.5cqi; }
+.timer-run.is-done { cursor: pointer; }
 
-/* Seconds + milliseconds, same style as the clock's seconds pill */
-.timer-sec-pill {
+.timer-tiles {
     display: flex;
-    align-items: baseline;
-    padding: .14em .42em;
-    border-radius: .4em;
-    font-size: 10cqi;
+    align-items: flex-start;
+    justify-content: center;
+    gap: .06em;
+    --tscale: 1;
+    font-size: min(16vw, 6rem);
+    font-size: calc(min(19cqi, 6.5rem) * var(--tscale));
 }
-.timer-sec-pill > .digits:first-child { color: var(--accent); }
-.ring.is-warn .timer-sec-pill > .digits:first-child { color: var(--warn); }
-.ring.is-done .timer-sec-pill > .digits:first-child { color: var(--danger); }
+/* Countdowns of 100+ hours get a third/fourth hour digit: shrink to fit. */
+.timer-tiles[data-hlen="3"] { --tscale: .86; }
+.timer-tiles[data-hlen="4"] { --tscale: .75; }
 
+.t-unit { display: flex; flex-direction: column; align-items: center; gap: .12em; }
+.t-label {
+    font-size: max(.62rem, .11em);
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+.timer-tiles .colon { height: 1.2em; justify-content: center; }
+.timer-tiles .tile .digits { color: var(--text-strong); }
+.timer-tiles .sec-tile .digits { color: var(--accent); }
+
+.timer-sub {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px 16px;
+}
+.ms-pill {
+    padding: .3em .75em;
+    border-radius: .6em;
+    font-size: min(6.5cqi, 1.6rem);
+}
+.ms-pill .digits { color: var(--text); }
 .timer-label {
-    min-height: 1.3em;
-    font-size: 4.2cqi;
+    font-size: clamp(.75rem, 2.8cqi, 1.05rem);
     font-weight: 700;
     letter-spacing: .12em;
     text-transform: uppercase;
     color: var(--accent);
 }
 
-.ring.is-paused .timer-digits { animation: blink 1.6s ease-in-out infinite; }
-.ring.is-warn .ring-bar { stroke: var(--warn); }
-.ring.is-warn .timer-digits { color: var(--warn); }
-.ring.is-done .ring-bar { stroke: var(--danger); }
-.ring.is-done .timer-digits,
-.ring.is-done .timer-label { color: var(--danger); }
-.ring.is-done .timer-digits { animation: pulse-alert 1s ease-in-out infinite; }
-.ring.is-done { cursor: pointer; }
+.timer-track {
+    width: 100%;
+    max-width: 30rem;
+    height: 14px;
+    padding: 3px;
+    border-radius: 999px;
+    overflow: hidden;
+}
+.timer-fill {
+    width: 100%;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    transition: background .3s ease;
+}
+
+.timer-run.is-paused .timer-tiles .digits { animation: blink 1.6s ease-in-out infinite; }
+.timer-run.is-warn .timer-tiles .digits,
+.timer-run.is-warn .timer-label { color: var(--warn); }
+.timer-run.is-warn .timer-fill { background: var(--warn); }
+.timer-run.is-done .timer-tiles .digits,
+.timer-run.is-done .timer-label { color: var(--danger); }
+.timer-run.is-done .timer-tiles .tile { animation: pulse-alert 1s ease-in-out infinite; }
 
 @keyframes blink { 50% { opacity: .35; } }
-@keyframes pulse-alert { 50% { transform: scale(1.06); } }
+@keyframes pulse-alert { 50% { transform: scale(1.05); } }
 
 /* ---------- Timer: controls ---------- */
 .controls {
@@ -705,7 +710,8 @@ body.focus .sec-pill { font-size: min(10cqi, 9vh); }
 body.focus .ampm { font-size: min(4.5cqi, 3.6vh); }
 body.focus .sec-track { max-width: 34rem; }
 body.focus .clock-date { font-size: clamp(.95rem, 2.4vh, 1.4rem); }
-body.focus .ring { width: min(84cqi, 62vh); }
+body.focus .timer-tiles { font-size: calc(min(19cqi, 30vh) * var(--tscale)); font-size: calc(min(19cqi, 30svh) * var(--tscale)); }
+body.focus .timer-track { max-width: 44rem; }
 
 /* ---------- Landscape phones ---------- */
 @media (orientation: landscape) and (max-height: 560px) {
@@ -744,14 +750,16 @@ body.focus .ring { width: min(84cqi, 62vh); }
     .field input, .field select { height: 40px; }
     .target { gap: 8px; }
     .hint { margin: 0; }
-    .ring { width: min(50cqi, 48vh); width: min(50cqi, 48svh); }
+    .timer-tiles { font-size: calc(min(13cqi, 36vh - 72px) * var(--tscale)); font-size: calc(min(13cqi, 36svh - 72px) * var(--tscale)); }
+    .timer-run { gap: 10px; }
+    .timer-track { height: 10px; padding: 2px; }
     .controls { grid-column: 2; grid-row: 2; flex-direction: column; gap: 14px; min-height: 0; }
     .round { width: 50px; height: 50px; }
     .round.big { width: 64px; height: 64px; }
 
     body.focus .clock-main { font-size: min(20cqi, 48vh); font-size: min(20cqi, 48svh); }
     body.focus .sec-pill { font-size: min(7cqi, 11vh); font-size: min(7cqi, 11svh); }
-    body.focus .ring { width: min(60cqi, 78vh); width: min(60cqi, 78svh); }
+    body.focus .timer-tiles { font-size: calc(min(15cqi, 30vh) * var(--tscale)); font-size: calc(min(15cqi, 30svh) * var(--tscale)); }
 }
 
 /* ---------- Wide screens (landscape phones, tablets, desktops) ----------
@@ -805,7 +813,9 @@ body.focus .ring { width: min(84cqi, 62vh); }
     .target { max-width: 28rem; }
     .field input, .field select { height: 56px; font-size: 1.05rem; }
     .hint { font-size: 1rem; }
-    .ring { width: min(72cqi, 54vh); width: min(72cqi, 54svh); }
+    .timer-tiles { font-size: calc(min(19cqi, 19vh) * var(--tscale)); font-size: calc(min(19cqi, 19svh) * var(--tscale)); }
+    .ms-pill { font-size: min(5cqi, 3.4vh); font-size: min(5cqi, 3.4svh); }
+    .timer-track { max-width: 44rem; height: 16px; }
     .round { width: 72px; height: 72px; }
     .round.big { width: 98px; height: 98px; }
     .round.big .icon { width: 36px; height: 36px; }
@@ -813,7 +823,7 @@ body.focus .ring { width: min(84cqi, 62vh); }
     .footer { font-size: .85rem; }
 
     body.focus .clock-main { font-size: min(27cqi, 40vh); font-size: min(27cqi, 40svh); }
-    body.focus .ring { width: min(80cqi, 70vh); width: min(80cqi, 70svh); }
+    body.focus .timer-tiles { font-size: calc(min(19cqi, 30vh) * var(--tscale)); font-size: calc(min(19cqi, 30svh) * var(--tscale)); }
 }
 
 /* ---------- Notice ---------- */
